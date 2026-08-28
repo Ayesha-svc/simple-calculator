@@ -1,146 +1,116 @@
-```javascript
-const display = document.getElementById('display');
+const display = document.getElementById("display");
 
-let currentInput = '';
-let previousInput = '';
+let currentInput = "";
+let previousInput = "";
 let operator = null;
-let shouldResetDisplay = false;
-
-function updateDisplay() {
-    if (operator !== null) {
-        display.value = `${previousInput} ${operator} ${currentInput}`;
-    } else {
-        display.value = currentInput;
-    }
-}
 
 function appendNumber(num) {
-    // Start a new calculation after pressing =
-    if (shouldResetDisplay) {
-        currentInput = '';
-        previousInput = '';
-        operator = null;
-        shouldResetDisplay = false;
-    }
+    // If starting a new number
+    currentInput += num;
 
     // Prevent multiple decimal points
-    if (num === '.') {
-        if (currentInput.includes('.')) {
-            return;
-        }
-
-        // If decimal is the first input, start with 0.
-        if (currentInput === '') {
-            currentInput = '0';
-        }
-    }
-
-    // Prevent unnecessary multiple zeros at the beginning
-    if (currentInput === '0' && num !== '.') {
-        currentInput = num;
-    } else {
-        currentInput += num;
+    if (num === "." && currentInput.split(".").length > 2) {
+        currentInput = currentInput.slice(0, -1);
+        return;
     }
 
     updateDisplay();
 }
 
 function appendOperator(op) {
-    // Do nothing if no number has been entered
-    if (currentInput === '' && previousInput === '') {
+    // No number entered
+    if (currentInput === "" && previousInput === "") {
         return;
     }
 
-    // If an operator already exists and a second number is entered,
-    // calculate the previous operation first
-    if (operator !== null && currentInput !== '') {
-        calculate();
-
-        previousInput = currentInput;
-        currentInput = '';
-    } else if (currentInput !== '') {
-        previousInput = currentInput;
-        currentInput = '';
+    // If changing operator before entering second number
+    if (previousInput !== "" && currentInput === "") {
+        operator = op;
+        updateDisplay();
+        return;
     }
 
+    // If there is already a complete calculation
+    if (previousInput !== "" && currentInput !== "" && operator !== null) {
+        calculate();
+    }
+
+    previousInput = currentInput;
+    currentInput = "";
     operator = op;
-    shouldResetDisplay = false;
 
     updateDisplay();
 }
 
 function calculate() {
     if (
-        operator === null ||
-        previousInput === '' ||
-        currentInput === ''
+        previousInput === "" ||
+        currentInput === "" ||
+        operator === null
     ) {
         return;
     }
 
     const prev = parseFloat(previousInput);
     const current = parseFloat(currentInput);
+
     let result;
 
     switch (operator) {
-        case '+':
+        case "+":
             result = prev + current;
             break;
 
-        case '-':
+        case "-":
             result = prev - current;
             break;
 
-        case '*':
+        case "*":
             result = prev * current;
             break;
 
-        case '/':
+        case "/":
             if (current === 0) {
-                display.value = 'Cannot divide by 0';
-
-                setTimeout(() => {
-                    clearDisplay();
-                }, 2000);
-
+                display.value = "Cannot divide by 0";
+                clearValues();
                 return;
             }
-
             result = prev / current;
             break;
-
-        default:
-            return;
     }
 
-    // Limit floating-point decimal errors
+    // Remove floating-point precision errors
     result = Math.round(result * 100000000) / 100000000;
 
-    // Show the complete calculation briefly
-    display.value = `${previousInput} ${operator} ${currentInput} = ${result}`;
+    // Show result
+    display.value = result;
 
-    // Store result for the next calculation
     currentInput = result.toString();
-    previousInput = '';
+    previousInput = "";
     operator = null;
-    shouldResetDisplay = true;
+}
+
+function updateDisplay() {
+    if (operator !== null) {
+        display.value = previousInput + " " + operator + " " + currentInput;
+    } else {
+        display.value = currentInput;
+    }
 }
 
 function clearDisplay() {
-    display.value = '';
-    currentInput = '';
-    previousInput = '';
+    clearValues();
+    display.value = "";
+}
+
+function clearValues() {
+    currentInput = "";
+    previousInput = "";
     operator = null;
-    shouldResetDisplay = false;
 }
 
 function deleteLast() {
-    if (shouldResetDisplay) {
-        clearDisplay();
-        return;
-    }
-
-    if (currentInput !== '') {
+    if (currentInput !== "") {
         currentInput = currentInput.slice(0, -1);
     }
 
