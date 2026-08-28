@@ -6,16 +6,24 @@ let shouldResetDisplay = false;
 
 function appendNumber(num) {
     if (shouldResetDisplay) {
-        display.value = num;
+        currentInput = '';
+        display.value = '';
         shouldResetDisplay = false;
-    } else {
-        // Prevent multiple decimal points
-        if (num === '.' && currentInput.includes('.')) {
-            return;
-        }
-        currentInput += num;
-        display.value = currentInput;
     }
+
+    // Prevent multiple decimal points
+    if (num === '.' && currentInput.includes('.')) {
+        return;
+    }
+
+    // Prevent starting with multiple zeros
+    if (currentInput === '0' && num !== '.') {
+        currentInput = num;
+    } else {
+        currentInput += num;
+    }
+
+    display.value = currentInput;
 }
 
 function appendOperator(op) {
@@ -25,13 +33,12 @@ function appendOperator(op) {
 
     if (operator !== null && currentInput !== '') {
         calculate();
-    } else if (currentInput !== '') {
-        previousInput = currentInput;
-        currentInput = '';
     }
 
+    previousInput = currentInput;
+    currentInput = '';
     operator = op;
-    shouldResetDisplay = true;
+    shouldResetDisplay = false;
 }
 
 function calculate() {
@@ -40,6 +47,7 @@ function calculate() {
     }
 
     let result;
+
     const prev = parseFloat(previousInput);
     const current = parseFloat(currentInput);
 
@@ -47,25 +55,36 @@ function calculate() {
         case '+':
             result = prev + current;
             break;
+
         case '-':
             result = prev - current;
             break;
+
         case '*':
             result = prev * current;
             break;
+
         case '/':
             if (current === 0) {
                 display.value = 'Cannot divide by 0';
-                setTimeout(clearDisplay, 2000);
+
+                setTimeout(() => {
+                    clearDisplay();
+                }, 2000);
+
                 return;
             }
+
             result = prev / current;
             break;
+
         default:
             return;
     }
 
+    // Limit decimal precision
     result = Math.round(result * 100000000) / 100000000;
+
     display.value = result;
     currentInput = result.toString();
     previousInput = '';
@@ -85,6 +104,7 @@ function deleteLast() {
     if (shouldResetDisplay) {
         return;
     }
+
     currentInput = currentInput.slice(0, -1);
     display.value = currentInput;
 }
