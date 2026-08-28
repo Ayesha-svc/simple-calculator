@@ -1,55 +1,86 @@
-let display = document.getElementById('display');
+```javascript
+const display = document.getElementById('display');
+
 let currentInput = '';
 let previousInput = '';
 let operator = null;
 let shouldResetDisplay = false;
 
+function updateDisplay() {
+    if (operator !== null) {
+        display.value = `${previousInput} ${operator} ${currentInput}`;
+    } else {
+        display.value = currentInput;
+    }
+}
+
 function appendNumber(num) {
+    // Start a new calculation after pressing =
     if (shouldResetDisplay) {
         currentInput = '';
-        display.value = '';
+        previousInput = '';
+        operator = null;
         shouldResetDisplay = false;
     }
 
     // Prevent multiple decimal points
-    if (num === '.' && currentInput.includes('.')) {
-        return;
+    if (num === '.') {
+        if (currentInput.includes('.')) {
+            return;
+        }
+
+        // If decimal is the first input, start with 0.
+        if (currentInput === '') {
+            currentInput = '0';
+        }
     }
 
-    // Prevent starting with multiple zeros
+    // Prevent unnecessary multiple zeros at the beginning
     if (currentInput === '0' && num !== '.') {
         currentInput = num;
     } else {
         currentInput += num;
     }
 
-    display.value = currentInput;
+    updateDisplay();
 }
 
 function appendOperator(op) {
+    // Do nothing if no number has been entered
     if (currentInput === '' && previousInput === '') {
         return;
     }
 
+    // If an operator already exists and a second number is entered,
+    // calculate the previous operation first
     if (operator !== null && currentInput !== '') {
         calculate();
+
+        previousInput = currentInput;
+        currentInput = '';
+    } else if (currentInput !== '') {
+        previousInput = currentInput;
+        currentInput = '';
     }
 
-    previousInput = currentInput;
-    currentInput = '';
     operator = op;
     shouldResetDisplay = false;
+
+    updateDisplay();
 }
 
 function calculate() {
-    if (operator === null || currentInput === '' || previousInput === '') {
+    if (
+        operator === null ||
+        previousInput === '' ||
+        currentInput === ''
+    ) {
         return;
     }
 
-    let result;
-
     const prev = parseFloat(previousInput);
     const current = parseFloat(currentInput);
+    let result;
 
     switch (operator) {
         case '+':
@@ -82,10 +113,13 @@ function calculate() {
             return;
     }
 
-    // Limit decimal precision
+    // Limit floating-point decimal errors
     result = Math.round(result * 100000000) / 100000000;
 
-    display.value = result;
+    // Show the complete calculation briefly
+    display.value = `${previousInput} ${operator} ${currentInput} = ${result}`;
+
+    // Store result for the next calculation
     currentInput = result.toString();
     previousInput = '';
     operator = null;
@@ -102,9 +136,14 @@ function clearDisplay() {
 
 function deleteLast() {
     if (shouldResetDisplay) {
+        clearDisplay();
         return;
     }
 
-    currentInput = currentInput.slice(0, -1);
-    display.value = currentInput;
+    if (currentInput !== '') {
+        currentInput = currentInput.slice(0, -1);
+    }
+
+    updateDisplay();
 }
+```
