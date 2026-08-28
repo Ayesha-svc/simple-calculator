@@ -54,7 +54,6 @@ body {
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s ease;
-    active: false;
 }
 
 .btn:hover {
@@ -97,7 +96,6 @@ body {
 .btn-clear {
     background: #f56565;
     color: #fff;
-    grid-column: span 1;
 }
 
 .btn-clear:hover {
