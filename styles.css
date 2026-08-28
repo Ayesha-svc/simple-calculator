@@ -25,7 +25,7 @@ body {
 .display {
     width: 100%;
     padding: 20px;
-    font-size: 2.5rem;
+    font-size: 2rem;
     text-align: right;
     border: none;
     border-radius: 10px;
@@ -34,6 +34,8 @@ body {
     color: #333;
     font-weight: 600;
     letter-spacing: 0.5px;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 .display:focus {
@@ -106,10 +108,11 @@ body {
     .calculator {
         max-width: 100%;
         margin: 10px;
+        padding: 15px;
     }
 
     .display {
-        font-size: 2rem;
+        font-size: 1.5rem;
         padding: 15px;
     }
 
